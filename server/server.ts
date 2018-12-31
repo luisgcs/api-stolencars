@@ -11,39 +11,39 @@ export class Server {
 	});
 
 	initializeDb(): any {
-	(<any>mongoose).Promise = global.Promise;
-	return mongoose.connect("mongodb://localhost/product");
+		(<any>mongoose).Promise = global.Promise;
+		return mongoose.connect("mongodb://localhost/product");
 	}
 
 	initRouters(routers: Router[]): Promise<any> {
-	return new Promise((resolve, reject) => {
-		try {
-		const corsOptions: corsMiddleware.Options = {
-			preflightMaxAge: 86400,
-			origins: ["*"],
-			allowHeaders: ["authorization"],
-			exposeHeaders: ["x-custom-header"]
-		};
-		const cors: corsMiddleware.CorsMiddleware = corsMiddleware(corsOptions);
+		return new Promise((resolve, reject) => {
+			try {
+				const corsOptions: corsMiddleware.Options = {
+					preflightMaxAge: 86400,
+					origins: ["*"],
+					allowHeaders: ["authorization"],
+					exposeHeaders: ["x-custom-header"]
+				};
+				const cors: corsMiddleware.CorsMiddleware = corsMiddleware(corsOptions);
 
-		this.app.pre(cors.preflight);
-		this.app.use(cors.actual);
-		this.app.use(rest.plugins.queryParser());
-		this.app.use(rest.plugins.bodyParser());
+				this.app.pre(cors.preflight);
+				this.app.use(cors.actual);
+				this.app.use(rest.plugins.queryParser());
+				this.app.use(rest.plugins.bodyParser());
 
-		for (let router of routers) {
-			router.applyRouter(this.app);
-		}
+				for (let router of routers) {
+					router.applyRouter(this.app);
+				}
 
-		this.app.listen(3000, () => {
-			resolve(this.app);
+				this.app.listen(3000, () => {
+					resolve(this.app);
+				});
+
+				this.app.on("restifyError", handleError);
+			} catch (err) {
+				reject(err);
+			}
 		});
-
-		this.app.on("restifyError", handleError);
-		} catch (err) {
-		reject(err);
-		}
-	});
 	}
 
 	bootstrap(routers: Router[] = []): Promise<Server> {
